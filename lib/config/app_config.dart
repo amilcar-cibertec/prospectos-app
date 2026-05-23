@@ -3,9 +3,9 @@ class AppConfig {
       'https://script.google.com/macros/s/AKfycbwjQBsXDpUoCIcIKdWL2BvuMAhpsJb1us_CUVrkoxLYIEKFpcy0z0LTeetd6DjFcQ23/exec';
 
   static const Map<String, String> vendedoresValidos = {
-    'V001':    'Suhail.R',
-    'V002':    'Yuly.G',
-    'V003':    'Any.L',
+    'RIOS0029':    'Suhail.R',
+    'GUAY0006':    'Yuly.G',
+    'LANA0071':    'Any.L',
   };
 
   // Tipos de prospecto disponibles
