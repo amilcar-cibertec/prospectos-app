@@ -25,29 +25,28 @@ class SheetsService {
       final params = [
         'fecha=${Uri.encodeComponent(prospecto.fecha)}',
         'vendedor=${Uri.encodeComponent(prospecto.vendedor)}',
-        'codigo=${Uri.encodeComponent(prospecto.codigoVendedor)}',
+        'codigoVendedor=${Uri.encodeComponent(prospecto.codigoVendedor)}',
         'nombre=${Uri.encodeComponent(prospecto.nombre)}',
         'telefono=${Uri.encodeComponent(prospecto.telefono)}',
-        'correo=${Uri.encodeComponent(prospecto.correo.isNotEmpty ? prospecto.correo : '-')}',
+        'correo=${Uri.encodeComponent(prospecto.correo)}',
         'distrito=${Uri.encodeComponent(prospecto.distrito)}',
+        'tipo=${Uri.encodeComponent(prospecto.tipo)}',
+        'nombreReferencia=${Uri.encodeComponent(prospecto.nombreReferencia)}',
+        'asesor=${Uri.encodeComponent(prospecto.asesor)}',
         'obs1=${Uri.encodeComponent(obs1)}',
         'obs2=${Uri.encodeComponent(obs2)}',
         'obs3=${Uri.encodeComponent(obs3)}',
       ].join('&');
 
-      // Nombre único para el callback JSONP
       _callbackCounter++;
       final callbackName = 'jsonpCallback$_callbackCounter';
-
       final urlFinal = '${AppConfig.scriptUrl}?$params&callback=$callbackName';
 
       final completer = Completer<bool>();
 
-      // Registrar función callback en window
       js.context[callbackName] = (js.JsObject response) {
         final status = response['status'];
         completer.complete(status == 'success');
-        // Limpiar callback y script del DOM
         js.context.callMethod('eval', ['''
           delete window["$callbackName"];
           var s = document.getElementById("$callbackName");
@@ -55,25 +54,22 @@ class SheetsService {
         ''']);
       };
 
-      // Inyectar script tag — JSONP clásico, sin restricciones CORS
       js.context.callMethod('eval', ['''
         var script = document.createElement("script");
         script.id = "$callbackName";
         script.src = "$urlFinal";
         script.onerror = function() {
-          console.error("Error cargando script JSONP");
+          console.error("Error JSONP");
         };
         document.head.appendChild(script);
       ''']);
 
-      // Timeout de seguridad: 10 segundos
       return completer.future.timeout(
         const Duration(seconds: 10),
         onTimeout: () => false,
       );
 
     } catch (e) {
-      print('Error: $e');
       return false;
     }
   }
