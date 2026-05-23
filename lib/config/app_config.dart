@@ -7,7 +7,14 @@ class AppConfig {
     'GUAY0006':    'Yuly.G',
     'LANA0071':    'Any.L',
   };
-
+  
+// Código → ID del Google Sheet personal
+  static const Map<String, String> vendedoresSheetId = {
+    'RIOS0029': '1uPl6FBmZ1rf-PARezwvJawQztiRW0xiBiI_FrjuRErg',
+    'GUAY0006': '1MpZkfgWAc0lW6YxQjH-hd1sHtoOYjmXAk4s11cEiVT0',
+    'LANA0071': '1uaV7gXSL4lKfNHVYCxrjiuW5ElBHN5_f2pXr8kvY5pY',
+  };
+  
   // Tipos de prospecto disponibles
   static const List<String> tiposProspecto = [
     '4/14',
