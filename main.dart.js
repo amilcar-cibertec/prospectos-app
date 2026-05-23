@@ -76727,7 +76727,7 @@ k.push(A.Gn(p.w,"Notas, observaciones, seguimiento...",B.E_,B.eE,"Informaci\xf3n
 k.push(p.mi("\ud83d\udccd Distrito"))
 k.push(A.Gn(p.r,o,B.Ea,B.eE,"Distrito",1,!0))
 j=p.y
-if(j!=null)j=j==="4/14"||j==="STAND"
+if(j!=null)j=j==="4/14"||j==="STAND"||j==="CAJA"
 else j=!1
 if(j)B.b.T(k,A.b([p.mi("\ud83d\udc65 Asesor 2"),p.Zx(),B.xO],m))
 k.push(B.MZ)
