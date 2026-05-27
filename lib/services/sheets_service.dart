@@ -9,33 +9,18 @@ class SheetsService {
 
   static Future<bool> enviarProspecto(Prospecto prospecto) async {
     try {
-      final partes = prospecto.observaciones.split(' | ');
-      String obs1 = '-', obs2 = '-', obs3 = '-';
-
-      for (final p in partes) {
-        if (p.startsWith('1er contacto: ')) {
-          obs1 = p.replaceFirst('1er contacto: ', '');
-        } else if (p.startsWith('2do contacto: ')) {
-          obs2 = p.replaceFirst('2do contacto: ', '');
-        } else if (p.startsWith('3er contacto: ')) {
-          obs3 = p.replaceFirst('3er contacto: ', '');
-        }
-      }
-
       final params = [
+        'token=${Uri.encodeComponent(AppConfig.tokenSecreto)}',  // ← nuevo
         'fecha=${Uri.encodeComponent(prospecto.fecha)}',
         'vendedor=${Uri.encodeComponent(prospecto.vendedor)}',
         'codigoVendedor=${Uri.encodeComponent(prospecto.codigoVendedor)}',
         'nombre=${Uri.encodeComponent(prospecto.nombre)}',
         'telefono=${Uri.encodeComponent(prospecto.telefono)}',
-        'correo=${Uri.encodeComponent(prospecto.correo)}',
+        'informacion=${Uri.encodeComponent(prospecto.informacion)}',
         'distrito=${Uri.encodeComponent(prospecto.distrito)}',
         'tipo=${Uri.encodeComponent(prospecto.tipo)}',
         'nombreReferencia=${Uri.encodeComponent(prospecto.nombreReferencia)}',
         'asesor=${Uri.encodeComponent(prospecto.asesor)}',
-        'obs1=${Uri.encodeComponent(obs1)}',
-        'obs2=${Uri.encodeComponent(obs2)}',
-        'obs3=${Uri.encodeComponent(obs3)}',
       ].join('&');
 
       _callbackCounter++;

@@ -21,34 +21,50 @@ class RegistroScreen extends StatefulWidget {
 }
 
 class _RegistroScreenState extends State<RegistroScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKey          = GlobalKey<FormState>();
+  final _nombreCtrl       = TextEditingController();
+  final _telefonoCtrl     = TextEditingController();
+  final _distritoCtrl     = TextEditingController();
+  final _informacionCtrl  = TextEditingController();
+  final _referenciaCtrl   = TextEditingController();
 
-  // Controladores existentes
-  final _nombreCtrl      = TextEditingController();
-  final _telefonoCtrl    = TextEditingController();
-  final _correoCtrl      = TextEditingController();
-  final _distritoCtrl    = TextEditingController();
-  final _obs1Ctrl        = TextEditingController();
-  final _obs2Ctrl        = TextEditingController();
-  final _obs3Ctrl        = TextEditingController();
-  final _referenciaCtrl  = TextEditingController();
-
-  // Nuevos campos
   String? _tipoSeleccionado;
   String? _asesorSeleccionado;
 
-  bool _enviando = false;
+  bool    _enviando = false;
   String? _mensaje;
-  bool _exito = false;
+  bool    _exito    = false;
 
-  String get _fechaHoy =>
-      DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now());
+  // 1. Nueva variable para guardar la fecha seleccionada
+  DateTime _fechaSeleccionada = DateTime.now();
 
-  // Vendedores disponibles para asesor (excluye al logueado)
-  List<String> get _asesoresDisponibles {
-    return AppConfig.vendedoresValidos.values
-        .where((nombre) => nombre != widget.nombreVendedor)
-        .toList();
+  // 2. Formatea la fecha elegida y le añade la hora actual
+  String get _fechaFormateada {
+    final date = DateFormat('dd/MM/yyyy').format(_fechaSeleccionada);
+    final time = DateFormat('HH:mm').format(DateTime.now());
+    return '$date $time';
+  }
+
+  List<String> get _asesoresDisponibles =>
+      AppConfig.vendedoresValidos.values
+          .where((n) => n != widget.nombreVendedor)
+          .toList();
+
+  // 3. Función del DatePicker con límites de 7 días atrás y HOY como máximo
+  Future<void> _seleccionarFecha() async {
+    final hoy = DateTime.now();
+    final fechaElegida = await showDatePicker(
+      context: context,
+      initialDate: _fechaSeleccionada,
+      firstDate: hoy.subtract(const Duration(days: 7)), // Máximo 7 días atrás
+      lastDate: hoy, // Nada en el futuro
+    );
+
+    if (fechaElegida != null) {
+      setState(() {
+        _fechaSeleccionada = fechaElegida;
+      });
+    }
   }
 
   Future<void> _enviar() async {
@@ -56,42 +72,32 @@ class _RegistroScreenState extends State<RegistroScreen> {
     if (_tipoSeleccionado == null) {
       setState(() {
         _mensaje = '❌ Selecciona el tipo de prospecto';
-        _exito = false;
+        _exito   = false;
       });
       return;
     }
 
     setState(() { _enviando = true; _mensaje = null; });
 
-    final obs = [
-      if (_obs1Ctrl.text.trim().isNotEmpty)
-        '1er contacto: ${_obs1Ctrl.text.trim()}',
-      if (_obs2Ctrl.text.trim().isNotEmpty)
-        '2do contacto: ${_obs2Ctrl.text.trim()}',
-      if (_obs3Ctrl.text.trim().isNotEmpty)
-        '3er contacto: ${_obs3Ctrl.text.trim()}',
-    ].join(' | ');
-
     final prospecto = Prospecto(
-      nombre:          _nombreCtrl.text.trim(),
-      telefono:        _telefonoCtrl.text.trim(),
-      correo:          _correoCtrl.text.trim(),
-      distrito:        _distritoCtrl.text.trim(),
-      observaciones:   obs,
-      fecha:           _fechaHoy,
-      vendedor:        widget.nombreVendedor,
-      codigoVendedor:  widget.codigoVendedor,
-      tipo:            _tipoSeleccionado!,
+      nombre:           _nombreCtrl.text.trim(),
+      telefono:         _telefonoCtrl.text.trim(),
+      informacion:      _informacionCtrl.text.trim(),
+      distrito:         _distritoCtrl.text.trim(),
+      fecha:            _fechaFormateada, // Usa la nueva fecha formateada
+      vendedor:         widget.nombreVendedor,
+      codigoVendedor:   widget.codigoVendedor,
+      tipo:             _tipoSeleccionado!,
       nombreReferencia: _referenciaCtrl.text.trim(),
-      asesor:          _asesorSeleccionado ?? '-',
+      asesor:           _asesorSeleccionado ?? '-',
     );
 
     final ok = await SheetsService.enviarProspecto(prospecto);
 
     setState(() {
       _enviando = false;
-      _exito = ok;
-      _mensaje = ok
+      _exito    = ok;
+      _mensaje  = ok
           ? '✅ Prospecto registrado en hoja "$_tipoSeleccionado"'
           : '❌ Error al subir datos';
     });
@@ -102,15 +108,13 @@ class _RegistroScreenState extends State<RegistroScreen> {
   void _limpiar() {
     _nombreCtrl.clear();
     _telefonoCtrl.clear();
-    _correoCtrl.clear();
     _distritoCtrl.clear();
-    _obs1Ctrl.clear();
-    _obs2Ctrl.clear();
-    _obs3Ctrl.clear();
+    _informacionCtrl.clear();
     _referenciaCtrl.clear();
     setState(() {
       _tipoSeleccionado   = null;
       _asesorSeleccionado = null;
+      _fechaSeleccionada  = DateTime.now(); // Resetea la fecha al limpiar
     });
   }
 
@@ -146,12 +150,12 @@ class _RegistroScreenState extends State<RegistroScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  // ── TIPO DE PROSPECTO ──────────────────────────
+                  // 1. TIPO
                   _seccion('🏷️ Tipo de Prospecto'),
                   _comboTipo(),
                   const SizedBox(height: 16),
 
-                  // ── REFERENCIA (label dinámico) ────────────────
+                  // 2. REFERENCIA
                   if (_tipoSeleccionado != null) ...[
                     _seccion('📌 ${AppConfig.labelReferencia(_tipoSeleccionado!)}'),
                     CustomTextField(
@@ -161,89 +165,77 @@ class _RegistroScreenState extends State<RegistroScreen> {
                     ),
                   ],
 
-                  // ── ASESOR (solo 4/14 y STAND) ─────────────────
-                  if (_tipoSeleccionado != null &&
-                      AppConfig.tieneAsesor(_tipoSeleccionado!)) ...[
-                    _seccion('👤 Asesor Adicional'),
-                    _comboAsesor(),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // ── DATOS DEL PROSPECTO ────────────────────────
-                  _seccion('👥 Datos del Prospecto'),
-                  CustomTextField(
-                    label: 'Nombre completo',
-                    controller: _nombreCtrl,
-                    icon: Icons.person_outline,
-                  ),
+                  // 3. TELÉFONO
+                  _seccion('📞 Teléfono'),
                   CustomTextField(
                     label: 'Teléfono',
                     controller: _telefonoCtrl,
                     icon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
                   ),
+
+                  // 4. NOMBRE Y APELLIDO
+                  _seccion('👤 Nombre y Apellido del Prospecto'),
                   CustomTextField(
-                    label: 'Correo electrónico',
-                    controller: _correoCtrl,
-                    icon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    obligatorio: false,
-                    hint: 'Opcional',
+                    label: 'Nombre y apellido',
+                    controller: _nombreCtrl,
+                    icon: Icons.person_outline,
                   ),
+
+                  // 5. INFORMACIÓN
+                  _seccion('📝 Información'),
+                  CustomTextField(
+                    label: 'Información',
+                    controller: _informacionCtrl,
+                    icon: Icons.info_outline,
+                    maxLines: 3,
+                    obligatorio: false,
+                    hint: 'Notas, observaciones, seguimiento...',
+                  ),
+
+                  // 6. DISTRITO
+                  _seccion('📍 Distrito'),
                   CustomTextField(
                     label: 'Distrito',
                     controller: _distritoCtrl,
                     icon: Icons.location_on_outlined,
                   ),
 
-                  // ── INTENTOS DE CONTACTO ───────────────────────
-                  _seccion('📝 Intentos de Contacto'),
-                  CustomTextField(
-                    label: '1er intento de contacto',
-                    controller: _obs1Ctrl,
-                    icon: Icons.chat_bubble_outline,
-                    maxLines: 2,
-                    obligatorio: false,
-                    hint: 'Ej: Llamó, interesado, cita para el viernes...',
-                  ),
-                  CustomTextField(
-                    label: '2do intento de contacto',
-                    controller: _obs2Ctrl,
-                    icon: Icons.chat_bubble_outline,
-                    maxLines: 2,
-                    obligatorio: false,
-                    hint: 'Ej: No contestó, dejó mensaje...',
-                  ),
-                  CustomTextField(
-                    label: '3er intento de contacto',
-                    controller: _obs3Ctrl,
-                    icon: Icons.chat_bubble_outline,
-                    maxLines: 2,
-                    obligatorio: false,
-                    hint: 'Ej: Confirmó reunión...',
-                  ),
+                  // 7. ASESOR 2
+                  if (_tipoSeleccionado != null &&
+                      AppConfig.tieneAsesor(_tipoSeleccionado!)) ...[
+                    _seccion('👥 Asesor 2'),
+                    _comboAsesor(),
+                    const SizedBox(height: 16),
+                  ],
 
-                  // ── FECHA ──────────────────────────────────────
+                  // 8. FECHA (Seleccionable mediante InkWell)
                   const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.indigo.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.indigo.shade100),
+                  InkWell(
+                    onTap: _seleccionarFecha,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo.shade50,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.indigo.shade100),
+                      ),
+                      child: Row(children: [
+                        const Icon(Icons.calendar_today,
+                            color: Colors.indigo, size: 18),
+                        const SizedBox(width: 10),
+                        Text('Fecha: $_fechaFormateada',
+                            style: GoogleFonts.poppins(
+                                color: Colors.indigo.shade700)),
+                        const Spacer(), // Empuja el ícono de edición a la derecha
+                        Icon(Icons.edit_calendar, color: Colors.indigo.shade300, size: 20),
+                      ]),
                     ),
-                    child: Row(children: [
-                      const Icon(Icons.calendar_today,
-                          color: Colors.indigo, size: 18),
-                      const SizedBox(width: 10),
-                      Text('Fecha: $_fechaHoy',
-                          style: GoogleFonts.poppins(
-                              color: Colors.indigo.shade700)),
-                    ]),
                   ),
                   const SizedBox(height: 24),
 
-                  // ── MENSAJE ────────────────────────────────────
+                  // MENSAJE
                   if (_mensaje != null)
                     Container(
                       margin: const EdgeInsets.only(bottom: 16),
@@ -265,7 +257,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                           )),
                     ),
 
-                  // ── BOTÓN ──────────────────────────────────────
+                  // BOTÓN REGISTRAR
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -300,14 +292,13 @@ class _RegistroScreenState extends State<RegistroScreen> {
     );
   }
 
-  // ── WIDGETS AUXILIARES ───────────────────────────────────
-
   Widget _comboTipo() {
     return DropdownButtonFormField<String>(
       value: _tipoSeleccionado,
       decoration: InputDecoration(
         labelText: 'Tipo de prospecto *',
-        prefixIcon: const Icon(Icons.category_outlined, color: Colors.indigo),
+        prefixIcon:
+            const Icon(Icons.category_outlined, color: Colors.indigo),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -326,7 +317,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
       }).toList(),
       onChanged: (val) => setState(() {
         _tipoSeleccionado   = val;
-        _asesorSeleccionado = null; // resetear asesor al cambiar tipo
+        _asesorSeleccionado = null;
         _referenciaCtrl.clear();
       }),
       validator: (val) =>
@@ -338,7 +329,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
     return DropdownButtonFormField<String>(
       value: _asesorSeleccionado,
       decoration: InputDecoration(
-        labelText: 'Asesor adicional (opcional)',
+        labelText: 'Asesor 2 (opcional)',
         prefixIcon:
             const Icon(Icons.people_outline, color: Colors.indigo),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -350,7 +341,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
       items: [
         DropdownMenuItem(
           value: null,
-          child: Text('Sin asesor adicional',
+          child: Text('Sin Asesor 2',
               style: GoogleFonts.poppins(color: Colors.grey)),
         ),
         ..._asesoresDisponibles.map((nombre) => DropdownMenuItem(

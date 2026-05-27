@@ -1,9 +1,8 @@
 class Prospecto {
   final String nombre;
   final String telefono;
-  final String correo;
+  final String informacion;      // ← reemplaza correo + observaciones
   final String distrito;
-  final String observaciones;
   final String fecha;
   final String vendedor;
   final String codigoVendedor;
@@ -14,9 +13,8 @@ class Prospecto {
   Prospecto({
     required this.nombre,
     required this.telefono,
-    this.correo = '',
+    this.informacion = '-',
     required this.distrito,
-    required this.observaciones,
     required this.fecha,
     required this.vendedor,
     required this.codigoVendedor,
@@ -26,16 +24,15 @@ class Prospecto {
   });
 
   Map<String, dynamic> toJson() => {
-        'nombre':          nombre,
-        'telefono':        telefono,
-        'correo':          correo.isNotEmpty ? correo : '-',
-        'distrito':        distrito,
-        'observaciones':   observaciones,
-        'fecha':           fecha,
-        'vendedor':        vendedor,
-        'codigoVendedor':  codigoVendedor,
-        'tipo':            tipo,
+        'nombre':           nombre,
+        'telefono':         telefono,
+        'informacion':      informacion.isNotEmpty ? informacion : '-',
+        'distrito':         distrito,
+        'fecha':            fecha,
+        'vendedor':         vendedor,
+        'codigoVendedor':   codigoVendedor,
+        'tipo':             tipo,
         'nombreReferencia': nombreReferencia,
-        'asesor':          asesor.isNotEmpty ? asesor : '-',
+        'asesor':           asesor.isNotEmpty ? asesor : '-',
       };
 }
