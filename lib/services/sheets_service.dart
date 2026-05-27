@@ -55,7 +55,7 @@ class SheetsService {
       ''']);
 
       return completer.future.timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 60),
         onTimeout: () => false,
       );
 
