@@ -1,12 +1,13 @@
 {
-    "name": "Exclusive SAC - Prospectos",
-    "short_name": "Exclusive SAC",
+    "name": "hello_flutter",
+    "short_name": "hello_flutter",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#4B0082",
-    "theme_color": "#4B0082",
-    "description": "App de gestión de prospectos - Exclusive SAC",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
+    "prefer_related_applications": false,
     "icons": [
         {
             "src": "icons/Icon-192.png",
