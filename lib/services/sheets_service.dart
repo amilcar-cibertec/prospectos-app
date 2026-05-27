@@ -29,15 +29,20 @@ class SheetsService {
 
       final completer = Completer<bool>();
 
-      js.context[callbackName] = (js.JsObject response) {
-        final status = response['status'];
-        completer.complete(status == 'success');
-        js.context.callMethod('eval', ['''
-          delete window["$callbackName"];
-          var s = document.getElementById("$callbackName");
-          if(s) s.remove();
-        ''']);
-      };
+      js.context[callbackName] = js.allowInterop((response) {
+  String status;
+  if (response is js.JsObject) {
+    status = response['status']?.toString() ?? '';
+  } else {
+    status = js.JsObject.fromBrowserObject(response)['status']?.toString() ?? '';
+  }
+  completer.complete(status == 'success');
+  js.context.callMethod('eval', ['''
+    delete window["$callbackName"];
+    var s = document.getElementById("$callbackName");
+    if(s) s.remove();
+  ''']);
+});
 
       js.context.callMethod('eval', ['''
         var script = document.createElement("script");
