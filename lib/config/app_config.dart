@@ -2,6 +2,11 @@ class AppConfig {
   static const String scriptUrl =
       'https://script.google.com/macros/s/AKfycbwjQBsXDpUoCIcIKdWL2BvuMAhpsJb1us_CUVrkoxLYIEKFpcy0z0LTeetd6DjFcQ23/exec';
 
+  static const String tokenSecreto = String.fromEnvironment(
+  'TOKEN_SECRETO',
+  defaultValue: '',
+);
+
   static const Map<String, String> vendedoresValidos = {
     'RIOS0029':    'Suhail.R',
     'GUAY0006':    'Yuly.G',
