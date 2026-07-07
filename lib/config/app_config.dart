@@ -1,23 +1,18 @@
 class AppConfig {
-  static const String scriptUrl =
-      'https://script.google.com/macros/s/AKfycbwjQBsXDpUoCIcIKdWL2BvuMAhpsJb1us_CUVrkoxLYIEKFpcy0z0LTeetd6DjFcQ23/exec';
+  static const String scriptUrl = String.fromEnvironment(
+    'SCRIPT_URL',
+    defaultValue: '',
+  );
 
   static const String tokenSecreto = String.fromEnvironment(
-  'TOKEN_SECRETO',
-  defaultValue: '',
-);
+    'TOKEN_SECRETO',
+    defaultValue: '',
+  );
 
   static const Map<String, String> vendedoresValidos = {
-    'RIOS0029':    'Suhail.R',
-    'GUAY0006':    'Yuly.G',
-    'LANA0071':    'Any.L',
-  };
-  
-// Código → ID del Google Sheet personal
-  static const Map<String, String> vendedoresSheetId = {
-    'RIOS0029': '1uPl6FBmZ1rf-PARezwvJawQztiRW0xiBiI_FrjuRErg',
-    'GUAY0006': '1MpZkfgWAc0lW6YxQjH-hd1sHtoOYjmXAk4s11cEiVT0',
-    'LANA0071': '1uaV7gXSL4lKfNHVYCxrjiuW5ElBHN5_f2pXr8kvY5pY',
+    'RIOS0029': 'Suhail.R',
+    'GUAY0006': 'Yuly.G',
+    'LANA0071': 'Any.L',
   };
   
   // Tipos de prospecto disponibles
